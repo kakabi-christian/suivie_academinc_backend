@@ -1,0 +1,15 @@
+1️⃣ Installer Sanctum via Composer
+
+composer require laravel/sanctum
+
+2️⃣ Publier la configuration et la migration
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+Cela va créer:config/sanctum.php
+une migration pour la table personal_access_tokens
+3️⃣ Exécuter la migration
+Pour créer la table personal_access_tokens :
+php artisan migrate
+
+//ISO9126 : Norme de definition d'un logiciel 
+php artisan make:factory NiveauFactory --model=Niveau
+php artisan db:seed
