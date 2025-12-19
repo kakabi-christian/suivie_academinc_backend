@@ -12,7 +12,9 @@ class UeController extends Controller
      */
     public function index()
     {
-        //
+        $ues = Ue::all();
+
+        return response()->json(['data' => $ues], 200);
     }
 
     /**
@@ -20,36 +22,59 @@ class UeController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validateData = $request->validate([
-                'code_ue' => 'required|min:5|string|unique:ues,code_ue',
-                'label_ue' => 'required|min:5|string',
-                'desc_ue' => 'nullable|string',
-                'code_niveau'=>'required|exists:niveaux,code_niveau'
-            ]);
+        $validateData = $request->validate([
+            'code_ue' => 'required|min:5|string|unique:ues,code_ue',
+            'label_ue' => 'required|min:5|string',
+            'desc_ue' => 'nullable|string',
+            'code_niveau' => 'required|exists:niveaux,code_niveau'
+        ]);
 
-            $res = Ue::create($validateData);
+        $ue = Ue::create($validateData);
 
-            return response()->json(["message" => "Ue crée avec succès", 'data' => $res], 201);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
+        return response()->json([
+            'message' => 'UE créée avec succès',
+            'data' => $ue
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Ue $ue)
+    public function show($id)
     {
-        //
+        $ue = Ue::find($id);
+
+        if (!$ue) {
+            return response()->json(['message' => 'UE introuvable'], 404);
+        }
+
+        return response()->json(['data' => $ue], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Ue $ue)
+    public function update(Request $request, $id)
     {
-        //
+        $ue = Ue::find($id);
+
+        if (!$ue) {
+            return response()->json(['message' => 'UE introuvable'], 404);
+        }
+
+        $validateData = $request->validate([
+            'code_ue' => 'sometimes|string|min:5|unique:ues,code_ue,' . $id . ',id',
+            'label_ue' => 'sometimes|string|min:5',
+            'desc_ue' => 'nullable|string',
+            'code_niveau' => 'sometimes|exists:niveaux,code_niveau'
+        ]);
+
+        $ue->update($validateData);
+
+        return response()->json([
+            'message' => 'UE mise à jour avec succès',
+            'data' => $ue
+        ], 200);
     }
 
     /**
@@ -57,6 +82,10 @@ class UeController extends Controller
      */
     public function destroy(Ue $ue)
     {
-        //
+        $ue->delete();
+
+        return response()->json([
+            'message' => 'UE supprimée avec succès'
+        ], 200);
     }
 }

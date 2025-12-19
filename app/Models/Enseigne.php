@@ -4,18 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Support\Str;
 
 class Enseigne extends Model
 {
     use HasFactory;
 
-    protected $table = 'enseignes';
+    protected $table = 'enseigne';
 
-    protected $primaryKey = ['code_pers', 'code_ec'];
+    protected $primaryKey = 'id';
 
-    public $incrementing = false;
-
+    public $incrementing = false; // UUID n’est pas auto-incrément
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -25,6 +24,16 @@ class Enseigne extends Model
     ];
 
     public $timestamps = true;
+
+    // Générer un UUID avant la création
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
 
     public function personnel()
     {

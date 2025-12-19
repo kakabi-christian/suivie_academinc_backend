@@ -12,7 +12,8 @@ class SalleController extends Controller
      */
     public function index()
     {
-        //
+        $salles = Salle::all();
+        return response()->json(['data' => $salles], 200);
     }
 
     /**
@@ -20,19 +21,18 @@ class SalleController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validateData= $request->validate([
-                'num_salle'=>'required|min:5|string|unique:salles,num_salle',
-                'contenance'=>'required|min:20|integer',
-                'status'=>'required|string|',
+        $validateData = $request->validate([
+            'num_salle' => 'required|min:5|string|unique:salles,num_salle',
+            'contenance' => 'required|integer|min:20',
+            'status' => 'required|string|in:Disponible,Indisponible',
+        ]);
 
-            ]);
-            $res=Salle::create($validateData);
-            return response()->json(["message"=> "Salle crée avec succès",'data'=>$res],201);
-        } 
-        catch (\Throwable $th) {
-            return response()->json(['message'=>$th->getMessage()]);
-        }
+        $salle = Salle::create($validateData);
+
+        return response()->json([
+            'message' => 'Salle créée avec succès',
+            'data' => $salle
+        ], 201);
     }
 
     /**
@@ -40,7 +40,6 @@ class SalleController extends Controller
      */
     public function show($id)
     {
-        try {
         $salle = Salle::find($id);
 
         if (!$salle) {
@@ -48,19 +47,13 @@ class SalleController extends Controller
         }
 
         return response()->json(['data' => $salle], 200);
-
-        }catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
     }
-
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
-        try {
         $salle = Salle::find($id);
 
         if (!$salle) {
@@ -76,21 +69,20 @@ class SalleController extends Controller
         $salle->update($validateData);
 
         return response()->json([
-            "message" => "Salle mise à jour avec succès",
-            "data" => $salle
+            'message' => 'Salle mise à jour avec succès',
+            'data' => $salle
         ], 200);
-
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Salle $salle)
     {
-        //
+        $salle->delete();
+
+        return response()->json([
+            'message' => 'Salle supprimée avec succès'
+        ], 200);
     }
 }

@@ -67,22 +67,21 @@ public function index(Request $request)
      *     @OA\Response(response=500, description="Server error")
      * )
      */
-    public function store(Request $request)
-    {
-        try {
-            $validateData = $request->validate([
-                'code_filiere' => 'required|min:5|string|unique:filieres,code_filiere',
-                'label_filiere' => 'required|min:5|string',
-                'desc_filiere' => 'nullable|string'
-            ]);
+   public function store(Request $request)
+{
+    $validateData = $request->validate([
+        'code_filiere' => 'required|min:5|string|unique:filieres,code_filiere',
+        'label_filiere' => 'required|min:5|string',
+        'desc_filiere' => 'nullable|string'
+    ]);
 
-            $res = Filiere::create($validateData);
+    $res = Filiere::create($validateData);
 
-            return response()->json(["message" => "Filiere crée avec succès", 'data' => $res], 201);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
-    }
+    return response()->json([
+        'message' => 'Filiere créée avec succès',
+        'data' => $res
+    ], 201);
+}
 
     /**
      * @OA\Get(

@@ -6,7 +6,6 @@ use App\Models\Personnel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-
 class PersonnelController extends Controller
 {
     /**
@@ -14,7 +13,8 @@ class PersonnelController extends Controller
      */
     public function index()
     {
-        //
+        $personnels = Personnel::all();
+        return response()->json(['data' => $personnels], 200);
     }
 
     /**
@@ -22,37 +22,31 @@ class PersonnelController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validateData = $request->validate([
-                'code_pers'  => 'required|unique:personnels,code_pers|string',
-                'nom_pers'   => 'required|string',
-                'sexe_pers'  => 'required|string|in:Masculin,Feminin',
-                'phone_pers' => 'required|string|unique:personnels,phone_pers',
-                'login_pers' => 'required|string|unique:personnels,login_pers',
-                'pwd_pers'   => 'required|string',
-                'type_pers'  => 'required|string', 
-            ]);
+        $validateData = $request->validate([
+            'code_pers'  => 'required|unique:personnels,code_pers|string',
+            'nom_pers'   => 'required|string',
+            'sexe_pers'  => 'required|string|in:Masculin,Feminin',
+            'phone_pers' => 'required|string|unique:personnels,phone_pers',
+            'login_pers' => 'required|string|unique:personnels,login_pers',
+            'pwd_pers'   => 'required|string',
+            'type_pers'  => 'required|string', 
+        ]);
 
-            $validateData['pwd_pers'] = Hash::make($validateData['pwd_pers']);
+        $validateData['pwd_pers'] = Hash::make($validateData['pwd_pers']);
 
-            $res = Personnel::create($validateData);
+        $personnel = Personnel::create($validateData);
 
-            return response()->json([
-                'message' => 'Personnel créé avec succès',
-                'data' => $res
-            ], 201);
-
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
+        return response()->json([
+            'message' => 'Personnel créé avec succès',
+            'data' => $personnel
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-   public function show($id)
-{
-    try {
+    public function show($id)
+    {
         $personnel = Personnel::find($id);
 
         if (!$personnel) {
@@ -60,18 +54,13 @@ class PersonnelController extends Controller
         }
 
         return response()->json(['data' => $personnel], 200);
-
-    } catch (\Throwable $th) {
-        return response()->json(['message' => $th->getMessage()], 500);
     }
-}
 
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, $id)
-{
-    try {
+    public function update(Request $request, $id)
+    {
         $personnel = Personnel::find($id);
 
         if (!$personnel) {
@@ -88,7 +77,7 @@ class PersonnelController extends Controller
             'type_pers'  => 'sometimes|string', 
         ]);
 
-        // Hash si le mot de passe est présent
+        // Hash le mot de passe si présent
         if (isset($validateData['pwd_pers'])) {
             $validateData['pwd_pers'] = Hash::make($validateData['pwd_pers']);
         }
@@ -99,18 +88,21 @@ class PersonnelController extends Controller
             'message' => 'Personnel mis à jour avec succès',
             'data' => $personnel
         ], 200);
-
-    } catch (\Throwable $th) {
-        return response()->json(['message' => $th->getMessage()], 500);
     }
-}
-
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Personnel $personnel)
+    public function destroy($id)
     {
-        //
+        $personnel = Personnel::find($id);
+
+        if (!$personnel) {
+            return response()->json(['message' => 'Personnel introuvable'], 404);
+        }
+
+        $personnel->delete();
+
+        return response()->json(['message' => 'Personnel supprimé avec succès'], 200);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\SalleController;
 use App\Http\Controllers\ProgrammationController;
 use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EnseigneController;
 
 
 Route::post('/login',[AuthController::class, 'login']);
@@ -20,6 +21,7 @@ Route::post('/login',[AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::apiResource("enseignes", EnseigneController::class);
     Route::apiResource("niveaux", NiveauController::class);
     Route::apiResource("Ue", UeController::class);
     Route::apiResource("ec", EcController::class);

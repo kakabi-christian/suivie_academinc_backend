@@ -12,7 +12,8 @@ class ProgrammationController extends Controller
      */
     public function index()
     {
-        //
+        $programmations = Programmation::all();
+        return response()->json(['data' => $programmations], 200);
     }
 
     /**
@@ -20,31 +21,30 @@ class ProgrammationController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validateData = $request->validate([
-                'code_ec'=>'required|exists:ecs,code_ec',
-                'num_salle'=>'required|exists:salles,num_salle',
-                'code_pers'=>'required|exists:personnels,code_pers',
-                'date'=>'required|date',
-                'heure_debut'=>'required|date_format:H:i',
-                'heure_fin'=>'required|date_format:H:i|after:heure_debut',
-                'nbre_heure'=>'required|integer',
-                'status'=>'required|string|in:Programmé,Annulé,Terminé',
-            ]);
-            $res = Programmation::create($validateData);
-            return response()->json(["message" => "Programmation crée avec succès", 'data' => $res], 201);
-        } catch (\Throwable $th) {
-            //throw $th;
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
+        $validateData = $request->validate([
+            'code_ec'      => 'required|exists:ecs,code_ec',
+            'num_salle'    => 'required|exists:salles,num_salle',
+            'code_pers'    => 'required|exists:personnels,code_pers',
+            'date'         => 'required|date',
+            'heure_debut'  => 'required|date_format:H:i',
+            'heure_fin'    => 'required|date_format:H:i|after:heure_debut',
+            'nbre_heure'   => 'required|integer|min:1',
+            'status'       => 'required|string|in:Programmé,Annulé,Terminé',
+        ]);
+
+        $programmation = Programmation::create($validateData);
+
+        return response()->json([
+            'message' => 'Programmation créée avec succès',
+            'data' => $programmation
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-   public function show($id)
-{
-    try {
+    public function show($id)
+    {
         $programmation = Programmation::find($id);
 
         if (!$programmation) {
@@ -52,19 +52,13 @@ class ProgrammationController extends Controller
         }
 
         return response()->json(['data' => $programmation], 200);
-
-    } catch (\Throwable $th) {
-        return response()->json(['message' => $th->getMessage()], 500);
     }
-}
-
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    try {
+    {
         $programmation = Programmation::find($id);
 
         if (!$programmation) {
@@ -85,21 +79,24 @@ class ProgrammationController extends Controller
         $programmation->update($validateData);
 
         return response()->json([
-            "message" => "Programmation mise à jour avec succès",
-            "data" => $programmation
+            'message' => 'Programmation mise à jour avec succès',
+            'data' => $programmation
         ], 200);
-
-    } catch (\Throwable $th) {
-        return response()->json(['message' => $th->getMessage()], 500);
     }
-}
-
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Programmation $programmation)
+    public function destroy($id)
     {
-        //
+        $programmation = Programmation::find($id);
+
+        if (!$programmation) {
+            return response()->json(['message' => 'Programmation introuvable'], 404);
+        }
+
+        $programmation->delete();
+
+        return response()->json(['message' => 'Programmation supprimée avec succès'], 200);
     }
 }
