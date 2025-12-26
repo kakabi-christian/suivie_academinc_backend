@@ -14,11 +14,19 @@ return new class extends Migration
         Schema::create('ecs', function (Blueprint $table) {
             $table->string('code_ec', 20)->primary();
             $table->string('label_ec', 100);
-            $table->text('desc_ec', 256)->nullable();
+            $table->string('desc_ec', 256)->nullable();
             $table->integer('nbh_ec');
             $table->integer('nbc_ec');
+
+            // 🖼️ Image de l'EC (chemin du fichier)
+            $table->string('image_ec')->nullable();
+
             $table->string('code_ue', 20);
-            $table->foreign('code_ue')->references('code_ue')->on('ue')->onDelete('cascade');
+            $table->foreign('code_ue')
+                  ->references('code_ue')
+                  ->on('ue')
+                  ->onDelete('cascade');
+
             $table->timestamps();
         });
     }

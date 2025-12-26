@@ -22,11 +22,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Filiere::factory(200)->create();
-        // Niveau::factory(500)->create();
-        // Ue::factory(1000)->create();
-        // Ec::factory(1000)->create();
-        // Salle::factory(1000)->create();
+        Filiere::factory(200)->create();
+        Niveau::factory(100)->create();
+        Ue::factory(100)->create();
+        // Ec::factory(100)->create();
+        Salle::factory(100)->create();
 
         Personnel::factory(2500)->create();
         Programmation::factory(500)->create();

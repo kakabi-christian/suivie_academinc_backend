@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log; // ✅ Import indispensable
 
 class UeController extends Controller
 {
@@ -12,6 +13,8 @@ class UeController extends Controller
      */
     public function index()
     {
+        Log::channel('audit')->info("Consultation de la liste des UEs.");
+        
         $ues = Ue::all();
 
         return response()->json(['data' => $ues], 200);
@@ -22,6 +25,8 @@ class UeController extends Controller
      */
     public function store(Request $request)
     {
+        Log::channel('audit')->info("Tentative de création d'une nouvelle UE.", $request->all());
+
         $validateData = $request->validate([
             'code_ue' => 'required|min:5|string|unique:ues,code_ue',
             'label_ue' => 'required|min:5|string',
@@ -30,6 +35,12 @@ class UeController extends Controller
         ]);
 
         $ue = Ue::create($validateData);
+
+        Log::channel('audit')->notice("UE créée avec succès.", [
+            'id' => $ue->id,
+            'code_ue' => $ue->code_ue,
+            'label' => $ue->label_ue
+        ]);
 
         return response()->json([
             'message' => 'UE créée avec succès',
@@ -45,8 +56,11 @@ class UeController extends Controller
         $ue = Ue::find($id);
 
         if (!$ue) {
+            Log::channel('audit')->warning("Consultation UE : ID $id introuvable.");
             return response()->json(['message' => 'UE introuvable'], 404);
         }
+
+        Log::channel('audit')->info("Consultation des détails de l'UE: {$ue->code_ue}");
 
         return response()->json(['data' => $ue], 200);
     }
@@ -56,9 +70,12 @@ class UeController extends Controller
      */
     public function update(Request $request, $id)
     {
+        Log::channel('audit')->info("Tentative de mise à jour de l'UE ID: $id");
+
         $ue = Ue::find($id);
 
         if (!$ue) {
+            Log::channel('audit')->error("Mise à jour UE échouée : ID $id introuvable.");
             return response()->json(['message' => 'UE introuvable'], 404);
         }
 
@@ -71,6 +88,8 @@ class UeController extends Controller
 
         $ue->update($validateData);
 
+        Log::channel('audit')->info("UE ID $id mise à jour avec succès.", ['code_ue' => $ue->code_ue]);
+
         return response()->json([
             'message' => 'UE mise à jour avec succès',
             'data' => $ue
@@ -82,7 +101,12 @@ class UeController extends Controller
      */
     public function destroy(Ue $ue)
     {
+        $codeUe = $ue->code_ue;
+        Log::channel('audit')->info("Demande de suppression de l'UE : $codeUe");
+
         $ue->delete();
+
+        Log::channel('audit')->notice("UE supprimée définitivement : $codeUe");
 
         return response()->json([
             'message' => 'UE supprimée avec succès'

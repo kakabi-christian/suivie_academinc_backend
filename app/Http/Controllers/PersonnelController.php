@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Personnel;
+use App\Mail\PersonnelCredentialsMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class PersonnelController extends Controller
 {
@@ -27,17 +30,30 @@ class PersonnelController extends Controller
             'nom_pers'   => 'required|string',
             'sexe_pers'  => 'required|string|in:Masculin,Feminin',
             'phone_pers' => 'required|string|unique:personnels,phone_pers',
-            'login_pers' => 'required|string|unique:personnels,login_pers',
+            'login_pers' => 'required|string|unique:personnels,login_pers', // Doit être un email valide pour Gmail
             'pwd_pers'   => 'required|string',
             'type_pers'  => 'required|string', 
         ]);
 
-        $validateData['pwd_pers'] = Hash::make($validateData['pwd_pers']);
+        // 1. Sauvegarder le mot de passe en clair pour l'email
+        $plainPassword = $validateData['pwd_pers'];
 
+        // 2. Hacher le mot de passe pour la sécurité de la base de données
+        $validateData['pwd_pers'] = Hash::make($plainPassword);
+
+        // 3. Créer le personnel dans la DB
         $personnel = Personnel::create($validateData);
 
+        // 4. Envoyer l'email avec les identifiants
+        try {
+            Mail::to($personnel->login_pers)->send(new PersonnelCredentialsMail($personnel, $plainPassword));
+        } catch (\Exception $e) {
+            // On enregistre l'erreur dans les logs mais on ne bloque pas la réponse
+            Log::error("Erreur d'envoi d'email au personnel : " . $e->getMessage());
+        }
+
         return response()->json([
-            'message' => 'Personnel créé avec succès',
+            'message' => 'Personnel créé avec succès et email envoyé',
             'data' => $personnel
         ], 201);
     }
@@ -77,7 +93,6 @@ class PersonnelController extends Controller
             'type_pers'  => 'sometimes|string', 
         ]);
 
-        // Hash le mot de passe si présent
         if (isset($validateData['pwd_pers'])) {
             $validateData['pwd_pers'] = Hash::make($validateData['pwd_pers']);
         }

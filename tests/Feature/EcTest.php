@@ -79,7 +79,7 @@ class EcTest extends TestCase
         $ue = Ue::factory()->create();
         $ec = Ec::factory()->create([
             'code_ue' => $ue->code_ue,
-            'code_ec' => 'EC' . Str::random(8), // code unique
+            'code_ec' => 'EC' . Str::random(10), // code unique
         ]);
 
         $response = $this->withHeaders($this->withApiTokenHeaders())

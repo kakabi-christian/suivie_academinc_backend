@@ -32,6 +32,22 @@ class FiliereTest extends TestCase
                  ]);
     }
 
+    // ✅ TEST SHOW FILIERE
+    public function test_show_filiere()
+    {
+        $filiere = Filiere::factory()->create();
+
+        $response = $this->withHeaders($this->withApiTokenHeaders())
+                         ->getJson("/api/filieres/{$filiere->code_filiere}");
+
+        $response->assertStatus(200)
+                 ->assertJson([
+                     'code_filiere' => $filiere->code_filiere,
+                     'label_filiere' => $filiere->label_filiere,
+                     'desc_filiere' => $filiere->desc_filiere,
+                 ]);
+    }
+
     public function test_update_filiere()
     {
         $filiere = Filiere::factory()->create();
